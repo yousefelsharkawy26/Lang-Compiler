@@ -1,0 +1,164 @@
+﻿"start symbol" = <program>
+               
+{String Char} = {Printable} - ["]
+
+!----------Terminals------------------------
+
+Identifier             = {Letter}({Letter}|{Digit}|'_')*              
+Integer                = {Digit}+ 
+Float                  = ( {Digit}+ '.' {Digit}* | '.' {Digit}+ ) ( [eE] [+-]? {Digit}+ )? | {Digit}+ [eE] [+-]? {Digit}+ 
+String                 = '"'{String Char}*'"' 
+Boolean                = 'true' | 'false'     
+MathOperator_High_P    = '*' | '^' | '/' | '%'
+MathOperator_Low_P     = '+' | '-'  
+LogicalOperator        = '&&' | '||' | '!'                    
+!--------------------------------------------                
+
+<program> ::= <stmt_list> | 
+           
+<stmt_list> ::= <stmt_list> <stmt> 
+             | <stmt>
+             
+<stmt> ::= <class>
+         | <struct>                 
+         | <if-else>
+         | <switch_stmt> 
+         | <loop>
+         | <method_decl>
+         | <method_call> ';'
+         | <declaration> ';'
+         | <object_declaration> ';'
+         | <assignment> ';'
+ 
+<block> ::= '{' <stmt_list> '}' 
+         | <stmt>
+         | ';'
+        
+!------------Declaration------------------         
+<declaration> ::= <type> Identifier                   
+                | <type> <assignment>
+                                 
+<assignment> ::= Identifier '=' <expr> 
+              
+<declaration_list> ::=  <declaration_list> <declaration> ';'
+                    | <declaration> ';'  
+
+<obj-body> ::= '=' 'new' '(' <args> ')'
+              |              
+                    
+<object_declaration> ::= 'object' Identifier Identifier <obj-body>
+
+!-----------------------------------------
+!------------Class Identifier-------------
+<generic> ::= '<' Identifier '>' |
+
+<inherits> ::= ':' Identifier | 
+
+<class> ::= 'build' Identifier <generic> <inherits> <block>
+         
+<struct> ::= 'struct' Identifier <struct-block>
+          
+<struct-block> ::= '{' <declaration_list> '}'
+               | '{' '}'
+               | <declaration> ';'
+               | ';'
+!-----------------------------------------
+!------------Conditions-------------------                                     
+<if-else>       ::= <check-state> <check-if-not>
+
+<check-state>   ::= 'si' '(' <condition> ')' <block>
+                
+<check-if-not>  ::= '->' <block>  
+
+<BooleanOperator>  ::= '==' | '!=' | '<' | '>' | '<=' | '>=' 
+                                
+<condition> ::= <expr> <BooleanOperator> <expr> 
+             | <expr> LogicalOperator <expr>
+             | Boolean
+             
+!-----------Switch/Case Block-------------
+<switch_stmt> ::= 'choose' '(' <expr> ')' '{' <option_list> <default_case> '}'
+
+<option_list> ::= <option_list> <option_case> | <option_case>
+               
+<option_case> ::= 'when' <expr> ':' <block>
+               
+<default_case> ::= 'def' ':' <block> | 
+
+!-----------------------------------------             
+!--------------Loops----------------------
+<loop> ::= 'do' '{' <stmt_list> '}' 'while' '(' <condition> ')'
+         | 'while' '(' <condition> ')' <block>
+         | 'for' Identifier 'in' <expr> <block>
+!-----------------------------------------         
+!------------Method Operations------------         
+<method_decl> ::= 'proc' Identifier ':' 'void' '(' <params> ')' <block>
+               | 'proc' Identifier ':' <type> '(' <params> ')' '{' <method_block> 'return' <expr> ';' '}'
+               
+<method_block> ::=  | <stmt_list>
+
+<params> ::= <param> <params->
+<params-> ::= ',' <param> <params-> | ! εmpty
+          
+<param> ::= <type> Identifier 
+
+<method_call> ::= Identifier '(' <args> ')'
+               
+               
+<args> ::= <expr> <args->
+        
+<args-> ::= ',' <expr> <args-> | ! εmpty 
+!-----------------------------------------
+!-----------Math Logic Operations---------         
+                        
+<expr> ::= <ternary_expr>
+
+<ternary_expr> ::= <logical_expr> '?' <expr> ':' <expr>
+                 | <logical_expr>
+
+<logical_expr> ::= <term> <expr->
+
+<expr-> ::= MathOperator_Low_P <term> <expr-> | ! εmpty
+
+<term> ::= <factor> <term->
+
+<term-> ::= MathOperator_High_P <factor> <term-> | ! εmpty
+
+<factor> ::= <method_call> 
+          | Integer
+          | Float
+          | String
+          | Boolean
+          | Identifier
+          | '(' <expr> ')'
+!-----------------------------------------  
+<type> ::= <primitive_type>
+                            ! Complex types 
+         | <array> | <list> | Identifier
+        
+<primitive_type> ::= 'fact' | 'text' | 'letter' | 'auto' | 'num'
+                  
+!---------------------------------------------
+
+<array> ::= <type> '[' <array-args> ']'
+         
+<array-args> ::=  <array-args> ',' Integer
+              | Integer
+              |
+              
+!<array-args-> ::= ',' Integer <array-args-> | ! εmpty   
+               
+!---------------------------------------------    
+
+<list> ::= 'list' '<' <list-args> '>'
+
+<list-args> ::= <list-args> ',' <type>
+             | <type> 
+             |
+             
+!<list-args-> ::= ',' <type> <list-args-> | ! εmpty
+
+
+
+
+
